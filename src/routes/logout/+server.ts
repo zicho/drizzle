@@ -3,7 +3,6 @@ import type { RequestHandler } from './$types';
 import { auth } from '$lib/db/lucia';
 
 export const GET: RequestHandler = async ({ locals }) => {
-    console.dir("poo")
     const session = await locals.auth.validate();
 
     if(!session) {

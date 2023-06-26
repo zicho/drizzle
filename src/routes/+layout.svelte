@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { user } from '$lib/db/schema';
 	import '../app.css';
-	import type { PageData } from './$types';
+	import type { PageData } from './(protected)/$types';
 
-	 export let data: PageData;
+	export let data: PageData;
 </script>
 
 <div class="navbar bg-neutral text-neutral-content">
@@ -12,10 +13,9 @@
 	<div class="flex-none">
 		<ul class="menu menu-horizontal px-1">
 			{#if data.user}
-				<li><a href="authed" class="hover:text-neutral-content">Authed</a></li>
+				<li><a href="logout" class="hover:text-neutral-content">{data.user.username}</a></li>
 				<li><a href="logout" class="hover:text-neutral-content">Log Out</a></li>
 			{:else}
-				<li><a href="non_authed" class="hover:text-neutral-content">Non-Authed</a></li>
 				<li><a href="login" class="hover:text-neutral-content">Login</a></li>
 				<li><a href="register" class="hover:text-neutral-content">Register</a></li>
 			{/if}

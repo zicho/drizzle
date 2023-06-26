@@ -1,12 +1,24 @@
-import { redirect, error, type Actions } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import { redirect, error, type Actions, fail } from '@sveltejs/kit';
 import { auth } from '$lib/db/lucia';
+import { registerSchema } from '$lib/validationSchemas/registerSchema';
+import type { PageServerLoad } from './$types';
+import { message, superValidate } from 'sveltekit-superforms/server';
+import { parseLuciaError } from '$lib/util/parseLuciaError';
+import type { LuciaError } from 'lucia-auth';
+
+export const load = (async (event) => {
+	const form = await superValidate(event, registerSchema);
+	return {
+		form
+	};
+}) satisfies PageServerLoad;
 
 export const actions: Actions = {
 	default: async ({ request, locals }) => {
-		const { username, password, confirm_password } = Object.fromEntries(
-			await request.formData()
-		) as Record<string, string>;
+		const form = await superValidate(request, registerSchema);
+		if (!form.valid) return fail(400, { form });
+
+		const { username, password } = form.data;
 
 		try {
 			await auth.createUser({
@@ -19,17 +31,13 @@ export const actions: Actions = {
 					username
 				}
 			});
-
 			const key = await auth.useKey('username', username, password);
 			const session = await auth.createSession(key.userId);
 			locals.auth.setSession(session);
-
 		} catch (err) {
-			console.log(err);
-			throw error(400, "Could not register user");
+			console.dir(err);
+			return message(form, parseLuciaError(err as unknown as LuciaError));
 		}
-
-		console.log("success")
 
 		throw redirect(302, '/');
 	}

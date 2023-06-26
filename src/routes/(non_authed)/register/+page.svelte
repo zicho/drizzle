@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-	import FormInput from '$lib/components/FormInput.svelte';
+	import { superForm } from 'sveltekit-superforms/client';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
+
+	const { form, errors, constraints, enhance, message } = superForm(data.form);
 </script>
 
 <div class="flex flex-col items-center justify-center pb-48 h-screen">
@@ -11,22 +12,71 @@
 		<form use:enhance method="post" class="px-8 pt-6 pb-8 bg-base-100 shadow-lg">
 			<h1 class="font-bold tracking-tight text-2xl mb-8">Register a new account</h1>
 			<div class="mb-4">
-				<FormInput name="username" placeholder="Enter your username" />
+				<label class="label" for="username">
+					<span class="font-bold">Username</span>
+					{#if $errors.username}<span class="text-error">{$errors.username}</span>{/if}
+				</label>
+				<input
+					name="username"
+					id="username"
+					bind:value={$form.username}
+					placeholder="Desired username"
+					aria-label="Desired username"
+					aria-invalid={$errors.username ? 'true' : undefined}
+					{...$constraints.username}
+					required
+					class="input input-bordered w-full"
+				/>
 			</div>
-			<div class="mb-6">
-				<FormInput name="password" placeholder="Enter your password" password />
+			<div class="mb-4">
+				<label class="label" for="password">
+					<span class="font-bold">Password</span>
+					{#if $errors.password}<span class="text-error">{$errors.password}</span>{/if}
+				</label>
+				<input
+					name="password"
+					id="password"
+					bind:value={$form.password}
+					placeholder="Enter password"
+					aria-label="Enter password"
+					aria-invalid={$errors.password ? 'true' : undefined}
+					{...$constraints.password}
+					type="password"
+					required
+					class="input input-bordered w-full"
+				/>
 			</div>
-			<div class="mb-6">
-				<FormInput name="confirm_password" placeholder="Confirm password" password />
+
+			<div class="mb-4">
+				<label class="label" for="confirm_password">
+					<span class="font-bold">Confirm password</span>
+					{#if $errors.confirm_password}<span class="text-error">{$errors.confirm_password}</span
+						>{/if}
+					{#if $errors['confirm']}<span class="text-error">{$errors['confirm']}</span>{/if}
+				</label>
+				<input
+					name="confirm_password"
+					id="confirm_password"
+					bind:value={$form.confirm_password}
+					placeholder="Confirm password"
+					aria-label="Confirm password"
+					aria-invalid={$errors.confirm_password ? 'true' : undefined}
+					{...$constraints.confirm_password}
+					type="password"
+					required
+					class="input input-bordered w-full"
+				/>
 			</div>
 			<div class="flex items-center justify-center">
 				<button class="btn btn-primary w-full" type="submit"> Sign In </button>
 			</div>
 		</form>
 
-		<div class="shadow-lg p-8 bg-error mt-8 text-center">
-			<span class="text-error-content">Error</span>
-		</div>
+		{#if $message}
+			<div class="shadow-lg p-8 bg-error my-8 text-center">
+				<span class="text-error-content">{$message}</span>
+			</div>
+		{/if}
 	</div>
 </div>
 
